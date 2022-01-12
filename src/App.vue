@@ -19,14 +19,14 @@
 </template>
 
 <script>
-import Scatterplot from './components/Scatterplot.vue';
+//import Scatterplot from './components/Scatterplot.vue';
 import ChoroplethMap from './components/ChoroplethMap.vue';
 import YearSlider from './components/YearSlider.vue';
 
 export default {
   name: 'App',
   components: {
-    Scatterplot, ChoroplethMap, YearSlider
+     ChoroplethMap, YearSlider
   },
   mounted() {
     this.$store.dispatch('loadData');

@@ -1,5 +1,9 @@
 <template>
   <div class="vis-component" ref="chart">
+    <div class="dropwdown" ref="dropwdown">
+      <select id="Button" ref="button"></select>
+      
+    </div>
     <div class="placeholder"></div>
     <svg class="main-svg" ref="mainsvg" :width="svgWidth" :height="svgHeight">
       <g class="chart-group" ref="chartGroup">
@@ -8,10 +12,14 @@
     </svg>
   </div>
 </template>
-
+<script src="https://unpkg.com/d3@4"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://unpkg.com/topojson@3"></script>
 <script>
+import * as topojson from "topojson";
 import * as d3 from "d3";
-import mapStatesUSA from "@/assets/us-states-geo.json";
+import worldMap from "@/assets/countries-110m.json";
 
 export default {
   name: "ChoroplethMap",
@@ -29,90 +37,117 @@ export default {
     };
   },
   mounted() {
-    this.deleteArea();
+    //this.deleteArea();
     this.projectStates();
+    this.showDropdown();
+    this.handleDropdown();
   },
   methods: {
-    deleteArea() {
-      d3.select(this.$refs.mainsvg).on("click", this.resetSelectedStates);
+    showDropdown() {
+      //https://www.d3-graph-gallery.com/graph/line_select.html
+      var save = "1";
+      d3.select(this.$refs.button)
+        .selectAll("countries")
+        .data(topojson.feature(worldMap, worldMap.objects.countries).features)
+        .enter()
+        .append("option")
+        .text((d) => d.properties.name)
+        .attr("value", (d) => d.properties.name);
     },
 
-    //The map svg has an ID, if we click somewhere not on this SVG, reset the selected states
-    resetSelectedStates(event) {
-      var reset = true;
-      console.log(event.path);
-      event.path.forEach((d) => {
-        if (d.id == "deleteID") reset = false;
+    handleDropdown(save) {
+            d3.select(this.$refs.button).on("change", () => {
+        this.handleDropdwonChange(d3.select("#Button").node().value);
+      }).on("click", () => {
+        this.handleDropdwonChange(d3.select("#Button").node().value);
       });
-      if (reset) {
-        this.$store.commit("resetSelectedStates");
-      }
     },
+
+    handleDropdwonChange(d) {
+      if (this.getSelectedState.has(d)) {
+        this.$store.commit("removeState", d);
+      } else {
+        this.$store.commit("changeSelectedState", d);
+      }
+      this.projectStates();
+    },
+    showToolTip(event, data) {
+      //Delete old Tooltip before displaying new one
+      d3.select(".tooltip").remove();
+      d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("left", `${event.pageX - 30}px`)
+        .style("top", `${event.pageY - 30}px`)
+        .style("opacity", 1)
+        .style("font-size", "17px")
+        .style("font-weight", "bold")
+        .text(data.properties.name)
+        .style("position", "absolute");
+    },
+
+    handleBarClick(event, d) {
+      if (this.getSelectedState.has(d.properties.name)) {
+        this.$store.commit("removeState", d.properties.name);
+      } else {
+        this.$store.commit("changeSelectedState", d.properties.name);
+      }
+
+      this.projectStates();
+    },
+
     //Create the map
     projectStates() {
       //The following lines (Line 55-59) are adapted from the link shown in the lessons: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c
       //Line 55-59
+
       var projection = d3
-        .geoAlbersUsa()
-        .scale([this.svgWidth + 200])
-        .translate([this.svgWidth / 2, this.svgHeight / 2]);
+        .geoMercator()
+        .scale([this.svgWidth - 430])
+        .translate([this.svgWidth / 2, this.svgHeight / 1.5]);
       var path = d3.geoPath().projection(projection);
       var svg = d3
-        .select(this.$refs.stateGroup)
+        .select(this.$refs.mainsvg)
         .append("svg")
-        .attr("id", "deleteID")
+        .attr("class", "worldmap")
+        //.attr("position", "absolute")
         .attr("width", this.svgWidth)
         .attr("height", this.svgHeight);
+      //https://bl.ocks.org/piwodlaiwo/3734a1357696dcff203a94012646e932
+
       svg
         .selectAll("path")
-        .data(mapStatesUSA.features)
+        .data(topojson.feature(worldMap, worldMap.objects.countries).features)
         .enter()
         .append("path")
         .attr("d", path)
-        .style("stroke", "grey")
+        .style("stroke", "white")
+        .on("click", this.handleBarClick)
+        .on("mouseover", this.showToolTip)
         .style("fill", (d) => {
-          return this.$store.state.stateColor.get(d.properties.name);
-        })
-        .style("stroke-width", 1)
-        .on("click", this.handleBarClick);
-    },
-    //Add state to selectedState
-    handleBarClick(event, d) {
-      this.$store.commit("changeSelectedState", d.properties.name);
+          if (this.getSelectedState.has(d.properties.name)) return "red";
+          return "grey";
+        });
     },
   },
   computed: {
-    educationRates: {
-      get() {
-        return this.$store.getters.educationRates;
-      },
-    },
-    personalIncome: {
-      get() {
-        return this.$store.getters.personalIncome;
-      },
-    },
-    selectedStates: {
+    getSelectedState: {
       get() {
         return this.$store.getters.selectedStates;
       },
     },
   },
   watch: {
-    selectedStates: {
+    getSelectedState: {
       handler() {
+        console.log("change in store");
         this.projectStates();
       },
       deep: true,
     },
-    stateColor: {
+    handleBarClick: {
       handler() {
-        this.projectStates();
-      },
-      deep: true,
-    },
-    personalIncome: {
-      handler() {
+        console.log("change in store");
         this.projectStates();
       },
       deep: true,

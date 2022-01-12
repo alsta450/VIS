@@ -7,7 +7,7 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     selectedYear: 2006,
-    selectedStates: [],
+    selectedStates: new Set,
     educationRates: [],
     personalIncome: [],
     stateColor: new Map(),
@@ -17,13 +17,17 @@ const store = new Vuex.Store({
       state.selectedYear = year;
     },
     changeSelectedState(state, val) {
-      state.selectedStates.push(val);
+      state.selectedStates.add(val);
     },
     addColorToState(state, map){
       state.stateColor = map;
     },
     resetSelectedStates(state){
       state.selectedStates = [];
+
+    },
+    removeState(state,val){
+      state.selectedStates.delete(val);
     }
   },
   getters: {
