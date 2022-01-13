@@ -11,6 +11,8 @@ const store = new Vuex.Store({
     educationRates: [],
     personalIncome: [],
     stateColor: new Map(),
+    covid_data: [],
+    barData: new Set
   },
   mutations: {
     changeSelectedYear(state, year) {
@@ -19,18 +21,57 @@ const store = new Vuex.Store({
     changeSelectedState(state, val) {
       state.selectedStates.add(val);
     },
-    addColorToState(state, map){
+    addColorToState(state, map) {
       state.stateColor = map;
     },
-    resetSelectedStates(state){
+    resetSelectedStates(state) {
       state.selectedStates = [];
 
     },
-    removeState(state,val){
+    removeState(state, val) {
       state.selectedStates.delete(val);
+    },
+    addbardata(state, val) {
+      for (var i = state.covid_data.length - 1; i >= 0; --i) {
+        if (val == state.covid_data[i].location) {
+          if (! (state.covid_data[i].icu_patients_per_million == "")) {
+            state.barData.add({
+              state: val,
+              icu: +state.covid_data[i].icu_patients_per_million,
+              smokers: +state.covid_data[i].male_smokers + +state.covid_data[i].female_smokers
+            }
+            );
+            break;
+          }
+        }
+      }
+
+
+
+
+      // let returnMap = new Map();
+      // for (let i = 0; i < stateList.length; i++) {
+      //   for (let i = state.covid_data - 1; i >= 0; --i) {
+      //     if (!returnMap.has(state.covid[i].location)) {
+      //       if (!state.covid[i].icu_patients == "") {
+      //         returnMap.set(state.covid[i].location, {
+      //           location: state.covid[i].location,
+      //           smokers:
+      //             +state.covid[i].male_smokers + +state.covid[i].female_smokers,
+      //           icu_patients: +state.covid[i].icu_patients_per_million,
+      //         });
+      //       }
+      //     }
+
+      //   }
+      //   returnMap.set(stateList[i],stateList[i]);
+      // }
+      // state.barData = Array.from(["test","tresdf"])
     }
   },
   getters: {
+    getBarData: (state) => state.barData,
+    covid(state) { return state.covid_data },
     selectedYear: (state) => state.selectedYear,
     selectedStates: (state) => state.selectedStates,
     educationRates(state) {
@@ -57,9 +98,10 @@ const store = new Vuex.Store({
       }
       return result;
     },
-    getColor(state){
+    getColor(state) {
       return state.stateColor;
-    }
+    },
+
   },
   actions: {
     loadData({ state }) {
@@ -69,6 +111,10 @@ const store = new Vuex.Store({
 
       d3.csv("./usa_personal-income-by-state_2006-2019.csv").then((data) => {
         state.personalIncome = data;
+      });
+
+      d3.csv("./owid-covid-data.csv").then((data) => {
+        state.covid_data = data;
       });
     },
   },

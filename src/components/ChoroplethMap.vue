@@ -58,8 +58,6 @@ export default {
     handleDropdown(save) {
             d3.select(this.$refs.button).on("change", () => {
         this.handleDropdwonChange(d3.select("#Button").node().value);
-      }).on("click", () => {
-        this.handleDropdwonChange(d3.select("#Button").node().value);
       });
     },
 
@@ -92,7 +90,8 @@ export default {
       } else {
         this.$store.commit("changeSelectedState", d.properties.name);
       }
-
+      this.$store.commit("addbardata", d.properties.name);
+      // console.log(this.$store.getters.selectedStates);
       this.projectStates();
     },
 
@@ -140,14 +139,12 @@ export default {
   watch: {
     getSelectedState: {
       handler() {
-        console.log("change in store");
         this.projectStates();
       },
       deep: true,
     },
     handleBarClick: {
       handler() {
-        console.log("change in store");
         this.projectStates();
       },
       deep: true,

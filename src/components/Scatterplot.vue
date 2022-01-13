@@ -2,7 +2,9 @@
   <div class="vis-component" ref="chart">
     <svg id="main-svg" :width="svgWidth" :height="svgHeight">
       <g class="chart-group" ref="chartGroup">
-        <g class="axis axis-x" ref="axisX"><g class="xLabel" ref="xLabel"></g></g>
+        <g class="axis axis-x" ref="axisX">
+          <g class="xLabel" ref="xLabel"></g>
+        </g>
         <g class="axis axis-y" ref="axisY"></g>
         <g class="point-group" ref="scatterPointGroup"></g>
         <g class="rectangle-group" ref="rectangleGroup"></g>
@@ -39,12 +41,15 @@ export default {
         "transform",
         `translate(${this.svgPadding.left},${this.svgPadding.top})`
       );
-
+      
       this.drawXAxis();
       this.drawYAxis();
-      this.paintPlotColors();
+      //this.paintPlotColors();
       this.drawPoints();
-      this.calculatePointPosition(this.combinedData());
+      //this.calculatePointPosition(this.combinedData());
+      //this.combinedDataDiabetes();
+      // console.log(this.diabetes);
+      //console.log(this.covid);
     },
     //append rectangles in the right colors
     paintPlotColors() {
@@ -78,7 +83,7 @@ export default {
     },
     //Tooltip
     showToolTip(event, data) {
-      //Delete old Tooltip before displaying new one 
+      //Delete old Tooltip before displaying new one
       d3.select(".tooltip").remove();
       d3.select("body")
         .append("div")
@@ -86,9 +91,9 @@ export default {
         .style("left", `${event.pageX - 30}px`)
         .style("top", `${event.pageY - 30}px`)
         .style("opacity", 1)
-        .style("font-size","17px")
-        .style("font-weight","bold")
-        .text(data.state)
+        .style("font-size", "17px")
+        .style("font-weight", "bold")
+        .text(data.location)
         .style("position", "absolute");
     },
     //on mouse leave delete tooltip
@@ -97,6 +102,7 @@ export default {
     },
     //Draw x-Axis
     drawXAxis() {
+      console.log()
       d3.select(this.$refs.axisX)
         .attr(
           "transform",
@@ -104,65 +110,82 @@ export default {
             this.svgHeight - this.svgPadding.top - this.svgPadding.bottom
           } )`
         )
-        .call(d3.axisBottom(this.xScale) )
+        .call(d3.axisBottom(this.xScale))
         .selectAll("text")
         .attr("y", 20)
         .attr("x", 3)
         .attr("dy", ".35em")
         .style("text-anchor", "end");
-          this.appendXAxisLabel();
+      this.appendXAxisLabel();
     },
-    appendXAxisLabel(){
+    appendXAxisLabel() {
       //For some reason it does not work if i call this.$refs.axisX no matter what I tried
-      d3.select(this.$refs.axisY).append("text")       
+      d3.select(this.$refs.axisY)
+        .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
         .text("Educational Attainment: Bachelor's Degree or Higher (%)")
-        .attr("x",390)
-        .attr("y",455)
-        .style("font-size",14);
+        .attr("x", 390)
+        .attr("y", 455)
+        .style("font-size", 14);
     },
     //Draw y-axis
     drawYAxis() {
-      d3.select(this.$refs.axisY)
-        .call(d3.axisLeft(this.yScale));
-    
-    this.appendYAxisLabel();
+      d3.select(this.$refs.axisY).call(d3.axisLeft(this.yScale));
+
+      this.appendYAxisLabel();
     },
-        appendYAxisLabel(){
+    appendYAxisLabel() {
       //For some reason it does not work if i call this.$refs.axisX no matter what I tried
-      d3.select(this.$refs.axisY).append("text")       
+      d3.select(this.$refs.axisY)
+        .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
         .text("Average Yearly Personal Income (in $)")
-        .attr("x",-100)
-        .attr("y",-50)
-                .attr('transform', 'rotate(-90)')
-        .style("font-size",14);
+        .attr("x", -100)
+        .attr("y", -50)
+        .attr("transform", "rotate(-90)")
+        .style("font-size", 14);
     },
     //Draw points
     drawPoints() {
       const scatterPointGroup = d3.select(this.$refs.scatterPointGroup);
       scatterPointGroup
         .selectAll(".point")
-        .data(this.combinedData)
+        .data(this.combinedDataDiabetes)
         .join("circle")
         .attr("class", "point")
-        .attr("cx", (d) => this.xScale(d.x))
-        .attr("cy", (d) => this.yScale(d.y))
-        .attr("r", d => {
-          if (this.getSelectedState.includes(d.state)) return 6;
-          return 4;
-        })
+        .attr("cx", (d) => this.xScale(d.diabetes_prevalence))
+        .attr("cy", (d) => this.yScale(d.icu_patients))
+        .attr("r", () => {return 4})
+        //   if (this.getSelectedState.has(d.state)) return 6;
+        //   return 4;
+        // })
         .style("fill", (d) => {
-          if (this.getSelectedState.includes(d.state)) return "red";
+          if (this.getSelectedState.has(d.state)) return "red";
           return "white";
         })
-        .style("stroke","brown")
+        .style("stroke", "brown")
         .on("mouseover", this.showToolTip)
         .on("mouseout", this.deleteToolTip);
     },
+    combinedDataDiabetes() {
+      let returnMap = new Map();
 
+      for (let i = this.$store.getters.covid.length - 1; i >= 0; --i) {
+        if (!returnMap.has(this.$store.getters.covid[i].location)) {
+          if (!this.$store.getters.covid[i].icu_patients == "") {
+            returnMap.set(this.$store.getters.covid[i].location, {
+              location: this.$store.getters.covid[i].location,
+              diabetes_prevalence:
+                +this.$store.getters.covid[i].diabetes_prevalence,
+              icu_patients: +this.$store.getters.covid[i].icu_patients_per_million,
+            });
+          }
+        }
+      }
+      return Array.from(returnMap.values());
+    },
     combinedData() {
       let returnArray = [];
       for (let i = 0; i < this.$store.getters.personalIncome.length; ++i) {
@@ -220,6 +243,11 @@ export default {
     },
   },
   computed: {
+    covid: {
+      get() {
+        return this.$store.getters.covid;
+      },
+    },
     educationRates: {
       get() {
         return this.$store.getters.educationRates;
@@ -241,16 +269,16 @@ export default {
       },
     },
     dataMaxY() {
-      return d3.max(this.personalIncome, (d) => d.value);
+      return d3.max(this.covid, (d) => d.icu_patients_per_million);
     },
     dataMinY() {
-      return d3.min(this.personalIncome, (d) => d.value);
+      return d3.min(this.covid, (d) => d.icu_patients_per_million);
     },
     dataMaxX() {
-      return d3.max(this.educationRates, (d) => d.value);
+      return d3.max(this.covid, (d) => d.diabetes_prevalence);
     },
     dataMinX() {
-      return d3.min(this.educationRates, (d) => d.value);
+      return d3.min(this.covid, (d) => d.diabetes_prevalence);
     },
     xScale() {
       return d3
@@ -262,11 +290,11 @@ export default {
     yScale() {
       return d3
         .scaleLinear()
-        .rangeRound([
+        .range([
           this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
           0,
         ])
-        .domain([this.dataMinY, this.dataMaxY]);
+        .domain([this.dataMinY, 200]);
     },
   },
   watch: {

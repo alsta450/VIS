@@ -1,17 +1,18 @@
 <template>
   <div id="app">
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-12">
-          <YearSlider/>
-        </div>
-      </div>
+
       <div class="row">
         <div class="col-md-5">
-          <Scatterplot/>
+          <ChoroplethMap/>
         </div>
         <div class="col-md-7">
-          <ChoroplethMap/>
+          <Scatterplot/>
+        </div>
+      </div>
+            <div class="row">
+        <div class="col-md-12">
+          <BarChart/>
         </div>
       </div>
     </div>
@@ -19,14 +20,14 @@
 </template>
 
 <script>
-//import Scatterplot from './components/Scatterplot.vue';
+import Scatterplot from './components/Scatterplot.vue';
 import ChoroplethMap from './components/ChoroplethMap.vue';
-import YearSlider from './components/YearSlider.vue';
+import BarChart from './components/BarChart.vue';
 
 export default {
   name: 'App',
   components: {
-     ChoroplethMap, YearSlider
+     ChoroplethMap,  BarChart ,Scatterplot 
   },
   mounted() {
     this.$store.dispatch('loadData');
