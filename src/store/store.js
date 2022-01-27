@@ -12,7 +12,8 @@ const store = new Vuex.Store({
     personalIncome: [],
     stateColor: new Map(),
     covid_data: [],
-    barData: new Set
+    barData: new Set,
+    lineData: []
   },
   mutations: {
     changeSelectedYear(state, year) {
@@ -46,30 +47,36 @@ const store = new Vuex.Store({
         }
       }
 
+    },
 
+    addLineData(state,val){
+      var tempMax = 0;
+      var tempDate = NaN;
+      var parseDate = d3.timeParse("%Y-%m-%d");
+      var temp = {State: val, values:[],max:0, maxDate:parseDate("2000-01-01"), minDate:parseDate("2030-01-01")};
+      for (var i = 0; i < state.covid_data.length; ++i) {
+        if (val == state.covid_data[i].location) {
+          tempDate = parseDate(state.covid_data[i].date);
+          if(tempDate > temp["maxDate"]){
+            temp["maxDate"] = tempDate;
+          }
+          if(tempDate < temp["minDate"]){
+            temp["minDate"] = tempDate;
+          }
+          tempMax = +state.covid_data[i].new_cases_per_million;
+          if(tempMax > temp["max"]){
+            temp["max"] = tempMax;
+          }
+          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases: +state.covid_data[i].new_cases_per_million})
+        }
+      }
+      state.lineData.push(temp);
 
+    },
 
-      // let returnMap = new Map();
-      // for (let i = 0; i < stateList.length; i++) {
-      //   for (let i = state.covid_data - 1; i >= 0; --i) {
-      //     if (!returnMap.has(state.covid[i].location)) {
-      //       if (!state.covid[i].icu_patients == "") {
-      //         returnMap.set(state.covid[i].location, {
-      //           location: state.covid[i].location,
-      //           smokers:
-      //             +state.covid[i].male_smokers + +state.covid[i].female_smokers,
-      //           icu_patients: +state.covid[i].icu_patients_per_million,
-      //         });
-      //       }
-      //     }
-
-      //   }
-      //   returnMap.set(stateList[i],stateList[i]);
-      // }
-      // state.barData = Array.from(["test","tresdf"])
-    }
   },
   getters: {
+    getLineData: (state) => state.lineData,
     getBarData: (state) => state.barData,
     covid(state) { return state.covid_data },
     selectedYear: (state) => state.selectedYear,

@@ -33,7 +33,6 @@ export default {
   },
   methods: {
     drawChart() {
-      console.log(this.getBarData);
       if (this.$refs.chart) this.svgWidth = this.$refs.chart.clientWidth;
       d3.select(this.$refs.chartGroup).attr(
         "transform",
@@ -41,9 +40,7 @@ export default {
       );
       this.drawXAxis();
       this.drawYAxis();
-      this.createBar()
-      // this.drawBars();
-      // this.drawMoreBars();
+      this.createBar();
     },
     drawXAxis() {
       d3.select(this.$refs.axisX)

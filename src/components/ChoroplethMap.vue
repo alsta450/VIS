@@ -91,6 +91,7 @@ export default {
         this.$store.commit("changeSelectedState", d.properties.name);
       }
       this.$store.commit("addbardata", d.properties.name);
+      this.$store.commit("addLineData", d.properties.name);
       // console.log(this.$store.getters.selectedStates);
       this.projectStates();
     },

@@ -102,7 +102,6 @@ export default {
     },
     //Draw x-Axis
     drawXAxis() {
-      console.log()
       d3.select(this.$refs.axisX)
         .attr(
           "transform",
@@ -198,14 +197,7 @@ export default {
       return returnArray;
     },
     //The color palette
-    getColor(x, y) {
-      const colors = [
-        ["#98BAE7", "#EED7CE", "#EAEAEA"],
-        ["#7267CB", "#ED50F1", "#FFC4E1"],
-        ["#6E3CBC", "#FF00E4", "#FF87CA"],
-      ];
-      return colors[x][y];
-    },
+
 
     //Depending on the position of the point, save the point + the color it's background has to the store
     calculatePointPosition(data) {

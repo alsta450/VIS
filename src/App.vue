@@ -6,13 +6,16 @@
         <div class="col-md-5">
           <ChoroplethMap/>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-5">
           <Scatterplot/>
         </div>
       </div>
             <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-5">
           <BarChart/>
+        </div>
+                <div class="col-md-5">
+          <LinePlot/>
         </div>
       </div>
     </div>
@@ -23,11 +26,12 @@
 import Scatterplot from './components/Scatterplot.vue';
 import ChoroplethMap from './components/ChoroplethMap.vue';
 import BarChart from './components/BarChart.vue';
+import LinePlot from './components/LinePlot.vue';
 
 export default {
   name: 'App',
   components: {
-     ChoroplethMap,  BarChart ,Scatterplot 
+     ChoroplethMap,  BarChart ,Scatterplot, LinePlot
   },
   mounted() {
     this.$store.dispatch('loadData');
