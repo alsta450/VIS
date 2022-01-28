@@ -43,14 +43,10 @@ export default {
 
       this.drawXAxis();
       this.drawYAxis();
-      //this.paintPlotColors();
+
       this.drawLines();
-      //this.calculatePointPosition(this.combinedData());
-      //this.combinedDataDiabetes();
-      // console.log(this.diabetes);
-      //console.log(this.covid);
+
     },
-    //append rectangles in the right colors
     //Tooltip
     showToolTip(event, data) {
       //Delete old Tooltip before displaying new one
@@ -119,7 +115,6 @@ export default {
     //Draw points
     drawLines() {
       console.log(this.getLineData); 
-
       const lineGroup = d3.select(this.$refs.lineGroup);
       lineGroup
         .selectAll(".line-group")
@@ -149,6 +144,7 @@ export default {
         return this.$store.getters.getLineData;
       },
     },
+
     dataMaxY() {
       console.log(this.getLineData);
       return d3.max(this.getLineData, (d) => d.max);
@@ -181,7 +177,7 @@ export default {
     },
   },
   watch: {
-    getSelectedState: {
+    getLineData: {
       handler() {
         this.drawChart();
       },
@@ -202,6 +198,6 @@ export default {
 .line {
   fill: none;
   stroke: #000;
-  stroke-width: '1px'
+  stroke-width: '0.5px'
 }
 </style>

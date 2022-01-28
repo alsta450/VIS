@@ -31,7 +31,7 @@ import LinePlot from './components/LinePlot.vue';
 export default {
   name: 'App',
   components: {
-     ChoroplethMap,  BarChart ,Scatterplot, LinePlot
+     ChoroplethMap,  BarChart , LinePlot, Scatterplot
   },
   mounted() {
     this.$store.dispatch('loadData');

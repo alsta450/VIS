@@ -2,7 +2,6 @@
   <div class="vis-component" ref="chart">
     <div class="dropwdown" ref="dropwdown">
       <select id="Button" ref="button"></select>
-      
     </div>
     <div class="placeholder"></div>
     <svg class="main-svg" ref="mainsvg" :width="svgWidth" :height="svgHeight">
@@ -56,17 +55,15 @@ export default {
     },
 
     handleDropdown(save) {
-            d3.select(this.$refs.button).on("change", () => {
+      d3.select(this.$refs.button).on("change", () => {
         this.handleDropdwonChange(d3.select("#Button").node().value);
       });
     },
 
     handleDropdwonChange(d) {
-      if (this.getSelectedState.has(d)) {
-        this.$store.commit("removeState", d);
-      } else {
-        this.$store.commit("changeSelectedState", d);
-      }
+      this.$store.commit("changeSelectedState", d);
+      this.$store.commit("addbardata", d);
+      this.$store.commit("addLineData", d);
       this.projectStates();
     },
     showToolTip(event, data) {
@@ -85,7 +82,7 @@ export default {
     },
 
     handleBarClick(event, d) {
-      if (this.getSelectedState.has(d.properties.name)) {
+      if (this.getSelectedState.includes(d.properties.name)) {
         this.$store.commit("removeState", d.properties.name);
       } else {
         this.$store.commit("changeSelectedState", d.properties.name);
@@ -100,7 +97,6 @@ export default {
     projectStates() {
       //The following lines (Line 55-59) are adapted from the link shown in the lessons: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c
       //Line 55-59
-
       var projection = d3
         .geoMercator()
         .scale([this.svgWidth - 430])
@@ -125,7 +121,7 @@ export default {
         .on("click", this.handleBarClick)
         .on("mouseover", this.showToolTip)
         .style("fill", (d) => {
-          if (this.getSelectedState.has(d.properties.name)) return "red";
+          if (this.getSelectedState.includes(d.properties.name)) return "red";
           return "grey";
         });
     },

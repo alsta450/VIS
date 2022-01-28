@@ -123,8 +123,8 @@ export default {
         .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("Educational Attainment: Bachelor's Degree or Higher (%)")
-        .attr("x", 390)
+        .text("Diabetes prevalence")
+        .attr("x", 330)
         .attr("y", 455)
         .style("font-size", 14);
     },
@@ -140,7 +140,7 @@ export default {
         .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("Average Yearly Personal Income (in $)")
+        .text("ICU patients per million")
         .attr("x", -100)
         .attr("y", -50)
         .attr("transform", "rotate(-90)")
@@ -161,7 +161,7 @@ export default {
         //   return 4;
         // })
         .style("fill", (d) => {
-          if (this.getSelectedState.has(d.state)) return "red";
+          if (this.getSelectedState.includes(d.state)) return "red";
           return "white";
         })
         .style("stroke", "brown")
@@ -200,39 +200,39 @@ export default {
 
 
     //Depending on the position of the point, save the point + the color it's background has to the store
-    calculatePointPosition(data) {
-      const mapForStorage = new Map();
-      for (var i = 0; i < data.length; i++) {
-        var x = this.getXColor(data[i]);
-        var y = this.getYColor(data[i]);
-        mapForStorage.set(data[i].state, this.getColor(x, y));
-      }
-      this.$store.commit("addColorToState", mapForStorage);
-    },
+    // calculatePointPosition(data) {
+    //   const mapForStorage = new Map();
+    //   for (var i = 0; i < data.length; i++) {
+    //     var x = this.getXColor(data[i]);
+    //     var y = this.getYColor(data[i]);
+    //     mapForStorage.set(data[i].state, this.getColor(x, y));
+    //   }
+    //   this.$store.commit("addColorToState", mapForStorage);
+    // },
     // if the point is in the first third, assign first color, and so on
-    getXColor(d) {
-      const minX = parseInt(this.dataMinX);
-      const maxX = parseInt(this.dataMaxX);
+    // getXColor(d) {
+    //   const minX = parseInt(this.dataMinX);
+    //   const maxX = parseInt(this.dataMaxX);
 
-      if (d.x <= minX + (maxX - minX) / 3) {
-        return 0;
-      } else if (d.x <= minX + (2 * (maxX - minX)) / 3) {
-        return 1;
-      } else {
-        return 2;
-      }
-    },
-    getYColor(d) {
-      const minY = parseInt(this.dataMinY);
-      const maxY = parseInt(this.dataMaxY);
-      if (d.y <= minY + (maxY - minY) / 3) {
-        return 2;
-      } else if (d.y <= minY + (2 * (maxY - minY)) / 3) {
-        return 1;
-      } else {
-        return 0;
-      }
-    },
+    //   if (d.x <= minX + (maxX - minX) / 3) {
+    //     return 0;
+    //   } else if (d.x <= minX + (2 * (maxX - minX)) / 3) {
+    //     return 1;
+    //   } else {
+    //     return 2;
+    //   }
+    // },
+    // getYColor(d) {
+    //   const minY = parseInt(this.dataMinY);
+    //   const maxY = parseInt(this.dataMaxY);
+    //   if (d.y <= minY + (maxY - minY) / 3) {
+    //     return 2;
+    //   } else if (d.y <= minY + (2 * (maxY - minY)) / 3) {
+    //     return 1;
+    //   } else {
+    //     return 0;
+    //   }
+    // },
   },
   computed: {
     covid: {
@@ -290,18 +290,6 @@ export default {
     },
   },
   watch: {
-    educationRates: {
-      handler() {
-        this.drawChart();
-      },
-      deep: true,
-    },
-    personalIncome: {
-      handler() {
-        this.drawChart();
-      },
-      deep: true,
-    },
     getSelectedState: {
       handler() {
         this.drawChart();

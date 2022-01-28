@@ -70,20 +70,23 @@ export default {
         .text("Educational Attainment: Bachelor's Degree or Higher (%)");
     },
 
-    createBar(){
-      let barsGroup = d3.select(this.$refs.barsGroup)
+    createBar() {
+      d3.selectAll(".bar").remove();
+      let barsGroup = d3
+        .select(this.$refs.barsGroup)
         .selectAll(".bar")
-        .data(Array.from(this.getBarData))
+        .data(this.getBarData)
         .enter()
         .append("g")
-        .attr("class", "bar")
-    
+        .attr("class", "bar");
+
       barsGroup
         .append("rect")
-        .attr("class", "bar")
-        .attr("x", (d) => this.xScale(d.state)+84)
+        .attr("class", "bar1")
+        .attr("x", (d) => this.xScale(d.state) + this.xScale.bandwidth() / 2)
         .attr("y", (d) => this.yScale(d.icu))
-        .attr("width", this.xScale.bandwidth()/2)
+        .attr("width", this.xScale.bandwidth() / 2)
+        .attr("fill","green")
         .attr(
           "height",
           (d) =>
@@ -91,15 +94,15 @@ export default {
             this.svgPadding.top -
             this.svgPadding.bottom -
             this.yScale(d.icu)
-        )
-        .on("click", (event, d) => this.handleBarClick(d.state));
+        );
 
-          barsGroup
+      barsGroup
         .append("rect")
-        .attr("class", "bar")
+        .attr("class", "bar2")
         .attr("x", (d) => this.xScale2(d.state))
         .attr("y", (d) => this.yScale2(d.smokers))
-        .attr("width", this.xScale2.bandwidth()/2)
+        .attr("width", this.xScale2.bandwidth() / 2)
+        .attr("fill","purple")
         .attr(
           "height",
           (d) =>
@@ -107,18 +110,7 @@ export default {
             this.svgPadding.top -
             this.svgPadding.bottom -
             this.yScale2(d.smokers)
-        )
-        .on("click", (event, d) => this.handleBarClick(d.state));
-
-
-    },
-
-    getcombinedData() {
-      let returnList = Array.from(this.getSelectedState);
-      return returnList;
-    },
-    handleBarClick(val) {
-      this.$store.commit("changeSelectedState", val);
+        );
     },
   },
   computed: {
@@ -128,15 +120,15 @@ export default {
       },
     },
     dataMax() {
-      return d3.max(Array.from(this.getBarData), (d) => d.icu);
+      return d3.max(this.getBarData, (d) => d.smokers);
     },
     dataMin() {
-      return d3.min(Array.from(this.getBarData), (d) => d.icu);
+      return d3.min(this.getBarData, (d) => d.smokers);
     },
     xScale() {
       return d3
         .scaleBand()
-        .domain(Array.from(this.getBarData).map((d) => d.state))
+        .domain(this.getBarData.map((d) => d.state))
         .range([
           0,
           this.svgWidth - this.svgPadding.left - this.svgPadding.right,
@@ -153,15 +145,15 @@ export default {
         .domain([this.dataMin > 0 ? 0 : this.dataMin, this.dataMax]);
     },
     dataMax2() {
-      return d3.max(Array.from(this.getBarData), (d) => d.smokers);
+      return d3.max(this.getBarData, (d) => d.smokers);
     },
     dataMin2() {
-      return d3.min(Array.from(this.getBarData), (d) => d.smokers);
+      return d3.min(this.getBarData, (d) => d.smokers);
     },
-        xScale2() {
+    xScale2() {
       return d3
         .scaleBand()
-        .domain(Array.from(this.getBarData).map((d) => d.state))
+        .domain(this.getBarData.map((d) => d.state))
         .range([
           0,
           this.svgWidth - this.svgPadding.left - this.svgPadding.right,
@@ -179,14 +171,9 @@ export default {
     },
   },
   watch: {
-    educationRates: {
-      handler() {
-        this.drawChart();
-      },
-      deep: true,
-    },
     getBarData: {
       handler() {
+        console.log("Watcher triggered");
         this.drawChart();
       },
       deep: true,

@@ -7,12 +7,12 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     selectedYear: 2006,
-    selectedStates: new Set,
+    selectedStates: [],
     educationRates: [],
     personalIncome: [],
     stateColor: new Map(),
     covid_data: [],
-    barData: new Set,
+    barData: [],
     lineData: []
   },
   mutations: {
@@ -20,7 +20,7 @@ const store = new Vuex.Store({
       state.selectedYear = year;
     },
     changeSelectedState(state, val) {
-      state.selectedStates.add(val);
+      state.selectedStates.push(val);
     },
     addColorToState(state, map) {
       state.stateColor = map;
@@ -30,13 +30,13 @@ const store = new Vuex.Store({
 
     },
     removeState(state, val) {
-      state.selectedStates.delete(val);
+      state.selectedStates = state.selectedStates.filter(value => value !== val)
     },
     addbardata(state, val) {
       for (var i = state.covid_data.length - 1; i >= 0; --i) {
         if (val == state.covid_data[i].location) {
           if (! (state.covid_data[i].icu_patients_per_million == "")) {
-            state.barData.add({
+            state.barData.push({
               state: val,
               icu: +state.covid_data[i].icu_patients_per_million,
               smokers: +state.covid_data[i].male_smokers + +state.covid_data[i].female_smokers
@@ -67,7 +67,11 @@ const store = new Vuex.Store({
           if(tempMax > temp["max"]){
             temp["max"] = tempMax;
           }
-          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases: +state.covid_data[i].new_cases_per_million})
+          var tempCase =  +state.covid_data[i].new_cases_per_million;
+          if(tempCase < 0){
+            tempCase=0;
+          }
+          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases:tempCase})
         }
       }
       state.lineData.push(temp);
@@ -81,30 +85,6 @@ const store = new Vuex.Store({
     covid(state) { return state.covid_data },
     selectedYear: (state) => state.selectedYear,
     selectedStates: (state) => state.selectedStates,
-    educationRates(state) {
-      let result = [];
-      for (let i = 0; i < state.educationRates.length; i++) {
-        if (state.selectedYear in state.educationRates[i]) {
-          result.push({
-            state: state.educationRates[i].State,
-            value: +state.educationRates[i][state.selectedYear],
-          });
-        }
-      }
-      return result;
-    },
-    personalIncome(state) {
-      let result = [];
-      for (let i = 0; i < state.personalIncome.length; i++) {
-        if (state.selectedYear in state.personalIncome[i]) {
-          result.push({
-            state: state.personalIncome[i].State,
-            value: state.personalIncome[i][state.selectedYear],
-          });
-        }
-      }
-      return result;
-    },
     getColor(state) {
       return state.stateColor;
     },
