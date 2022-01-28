@@ -64,12 +64,46 @@ export default {
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
-        .attr("dy", "0.71em")
+        .attr("dy", "0.75em")
+        .style("font-size", "17px")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("Educational Attainment: Bachelor's Degree or Higher (%)");
+        .text("ICU per million vs smoking rate");
     },
 
+    showToolTip(event, data) {
+      //Delete old Tooltip before displaying new one
+
+      d3.select(".tooltip").remove();
+      d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("left", `${event.pageX - 30}px`)
+        .style("top", `${event.pageY - 30}px`)
+        .style("opacity", 1)
+        .style("font-size", "17px")
+        .style("font-weight", "bold")
+        .text("ICU per million: " + data.icu)
+        .style("position", "absolute");
+    },
+    deleteToolTip() {
+      d3.select(".tooltip").remove();
+    },
+    showToolTip2(event, data) {
+      //Delete old Tooltip before displaying new one
+
+      d3.select(".tooltip").remove();
+      d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("left", `${event.pageX - 30}px`)
+        .style("top", `${event.pageY - 30}px`)
+        .style("opacity", 1)
+        .style("font-size", "17px")
+        .style("font-weight", "bold")
+        .text("Total Smokers: " + data.smokers)
+        .style("position", "absolute");
+    },
     createBar() {
       d3.selectAll(".bar").remove();
       let barsGroup = d3
@@ -86,7 +120,7 @@ export default {
         .attr("x", (d) => this.xScale(d.state) + this.xScale.bandwidth() / 2)
         .attr("y", (d) => this.yScale(d.icu))
         .attr("width", this.xScale.bandwidth() / 2)
-        .attr("fill","green")
+        .attr("fill", "green")
         .attr(
           "height",
           (d) =>
@@ -94,7 +128,9 @@ export default {
             this.svgPadding.top -
             this.svgPadding.bottom -
             this.yScale(d.icu)
-        );
+        )
+        .on("mouseover", this.showToolTip)
+        .on("mouseout", this.deleteToolTip);
 
       barsGroup
         .append("rect")
@@ -102,7 +138,7 @@ export default {
         .attr("x", (d) => this.xScale2(d.state))
         .attr("y", (d) => this.yScale2(d.smokers))
         .attr("width", this.xScale2.bandwidth() / 2)
-        .attr("fill","purple")
+        .attr("fill", "purple")
         .attr(
           "height",
           (d) =>
@@ -110,7 +146,9 @@ export default {
             this.svgPadding.top -
             this.svgPadding.bottom -
             this.yScale2(d.smokers)
-        );
+        )
+        .on("mouseover", this.showToolTip2)
+        .on("mouseout", this.deleteToolTip);
     },
   },
   computed: {
@@ -120,7 +158,7 @@ export default {
       },
     },
     dataMax() {
-      return d3.max(this.getBarData, (d) => d.smokers);
+      return d3.max(this.getBarData, (d) => d.icu);
     },
     dataMin() {
       return d3.min(this.getBarData, (d) => d.smokers);
@@ -173,7 +211,6 @@ export default {
   watch: {
     getBarData: {
       handler() {
-        console.log("Watcher triggered");
         this.drawChart();
       },
       deep: true,

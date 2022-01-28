@@ -80,7 +80,9 @@ export default {
         .text(data.properties.name)
         .style("position", "absolute");
     },
-
+    deleteToolTip() {
+      d3.select(".tooltip").remove();
+    },
     handleBarClick(event, d) {
       if (this.getSelectedState.includes(d.properties.name)) {
         this.$store.commit("removeState", d.properties.name);
@@ -117,12 +119,13 @@ export default {
         .enter()
         .append("path")
         .attr("d", path)
-        .style("stroke", "white")
+        .style("stroke", "grey")
         .on("click", this.handleBarClick)
         .on("mouseover", this.showToolTip)
+        .on("mouseout", this.deleteToolTip)
         .style("fill", (d) => {
           if (this.getSelectedState.includes(d.properties.name)) return "red";
-          return "grey";
+          return "white";
         });
     },
   },

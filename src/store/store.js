@@ -13,6 +13,7 @@ const store = new Vuex.Store({
     stateColor: new Map(),
     covid_data: [],
     barData: [],
+    scatterData: [],
     lineData: []
   },
   mutations: {
@@ -38,8 +39,8 @@ const store = new Vuex.Store({
           if (! (state.covid_data[i].icu_patients_per_million == "")) {
             state.barData.push({
               state: val,
-              icu: +state.covid_data[i].icu_patients_per_million,
-              smokers: +state.covid_data[i].male_smokers + +state.covid_data[i].female_smokers
+              icu: +state.covid_data[i].icu_patients_per_million.replace(".",""),
+              smokers: +state.covid_data[i].male_smokers.replace(".","") + +state.covid_data[i].female_smokers.replace(".","")
             }
             );
             break;
@@ -63,11 +64,11 @@ const store = new Vuex.Store({
           if(tempDate < temp["minDate"]){
             temp["minDate"] = tempDate;
           }
-          tempMax = +state.covid_data[i].new_cases_per_million;
+          tempMax = +state.covid_data[i].new_cases_per_million.replace(".","");
           if(tempMax > temp["max"]){
             temp["max"] = tempMax;
           }
-          var tempCase =  +state.covid_data[i].new_cases_per_million;
+          var tempCase =  +state.covid_data[i].new_cases_per_million.replace(".","");
           if(tempCase < 0){
             tempCase=0;
           }
@@ -78,8 +79,11 @@ const store = new Vuex.Store({
 
     },
 
+
+
   },
   getters: {
+    getScatterData: (state) => state.scatterData,
     getLineData: (state) => state.lineData,
     getBarData: (state) => state.barData,
     covid(state) { return state.covid_data },
@@ -92,16 +96,30 @@ const store = new Vuex.Store({
   },
   actions: {
     loadData({ state }) {
-      d3.csv("./usa_ba-degree-or-higher_2006-2019.csv").then((data) => {
-        state.educationRates = data;
-      });
 
-      d3.csv("./usa_personal-income-by-state_2006-2019.csv").then((data) => {
-        state.personalIncome = data;
-      });
 
       d3.csv("./owid-covid-data.csv").then((data) => {
         state.covid_data = data;
+
+        let returnMap = new Map();
+
+        for (let i = data.length - 1; i >= 0; --i) {
+          if (!returnMap.has(data[i].location)) {
+            if (!data[i].icu_patients_per_million == "") {
+              if(!data[i].diabetes_prevalence == ""){
+              returnMap.set(data[i].location, {
+                location: data[i].location,
+                diabetes_prevalence:
+                  +data[i].diabetes_prevalence.replace(".",""),
+                icu_patients: +data[i].icu_patients_per_million.replace(".",""),
+              });
+            }
+            }
+          }
+        }
+        state.scatterData =  Array.from(returnMap.values());
+
+
       });
     },
   },
