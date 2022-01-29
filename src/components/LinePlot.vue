@@ -1,9 +1,6 @@
 <template>
   <div class="vis-component" ref="chart">
-    <div id="changeView">
-      <button v-on:click="firstView">Vacc VS Infections</button>
-      <button v-on:click="gdpView">GDP and Vacc Rate</button>
-    </div>
+
     <svg id="main-svg-line" :width="svgWidth" :height="svgHeight">
       <g class="chart-group-line" ref="chartGroup">
         <g class="axis-x-line" ref="axisX">
@@ -13,6 +10,10 @@
         <g class="line-group" ref="lineGroup"></g>
       </g>
     </svg>
+        <div id="changeView">
+      <button v-on:click="firstView" class="btn btn-primary">Vacc VS Infections</button>
+      <button v-on:click="gdpView" class="btn btn-primary">GDP and Vacc Rate</button>
+    </div>
   </div>
 </template>
 
@@ -269,7 +270,7 @@ export default {
         .style("opacity", 1)
         .style("font-size", "17px")
         .style("font-weight", "bold")
-        .text(data.State + " GDP: " + data.GDP)
+        .text(data.State + " GDP per head: " +  (data.GDP/data.population).toFixed(6) )
         .style("position", "absolute");
     },
   },

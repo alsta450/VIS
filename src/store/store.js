@@ -39,7 +39,7 @@ const store = new Vuex.Store({
             state.barData.push({
               state: val,
               icu: +state.covid_data[i].icu_patients_per_million.replace(".",""),
-              smokers: +state.covid_data[i].male_smokers.replace(".","") + +state.covid_data[i].female_smokers.replace(".","")
+              smokers: (+state.covid_data[i].male_smokers + +state.covid_data[i].female_smokers)/2
             }
             );
             break;
@@ -62,7 +62,7 @@ const store = new Vuex.Store({
         if (val == state.covid_data[i].location) {
 
             temp["GDP"]=+state.covid_data[i].gdp_per_capita.replace(".","");
-
+            temp["population"] = +state.covid_data[i].population.replace(".","");
 
 
           var tempVacc = +state.covid_data[i].new_vaccinations_smoothed_per_million;

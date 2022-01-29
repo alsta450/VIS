@@ -1,16 +1,14 @@
 <template>
   <div class="vis-component" ref="chart">
     <div class="dropwdown" ref="dropwdown">
-      <select id="Button" ref="button"></select>
+      <select id="Button" ref="button" ></select>
     </div>
     <div id="reset">
-      <button v-on:click="resetStates">Reset States</button>
+      <button v-on:click="resetStates" class="btn btn-primary">Reset States</button>
     </div>
-    <div class="placeholder"></div>
+    <h3>Click on any country to add Data to charts</h3>
     <svg class="main-svg" ref="mainsvg" :width="svgWidth" :height="svgHeight">
-      <g class="chart-group" ref="chartGroup">
-        <g class="stateGroup" ref="stateGroup"></g>
-      </g>
+
     </svg>
   </div>
 </template>
@@ -55,7 +53,8 @@ export default {
         topojson.feature(worldMap, worldMap.objects.countries).features
       );
       //https://www.d3-graph-gallery.com/graph/line_select.html
-      var save = "1";
+      // I used this website as a tutorial for my dropdown, but it's heavily modified for my needs
+      //From here 
       d3.select(this.$refs.button)
         .selectAll("countries")
         .data(
@@ -67,6 +66,7 @@ export default {
         .append("option")
         .text((d) => d.properties.name)
         .attr("value", (d) => d.properties.name);
+        //To here
     },
 
     handleDropdown(save) {
@@ -112,30 +112,30 @@ export default {
 
     //Create the map
     projectStates() {
-      //The following lines (Line 55-59) are adapted from the link shown in the lessons: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c
-      //Line 55-59
-
+      //The following lines (Line 119-123) are adapted from the link shown in the lessons: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c
+      //From here
       var projection = d3
         .geoMercator()
         .scale([this.svgWidth - 430])
-        .translate([this.svgWidth / 2, this.svgHeight / 1.5]);
+        .translate([this.svgWidth / 2, this.svgHeight / 2.4]);
       var path = d3.geoPath().projection(projection);
+      //To here
 
       var svg = d3
         .select(this.$refs.mainsvg)
         .append("svg")
         .attr("class", "worldmap")
-        //.attr("position", "absolute")
         .attr("width", this.svgWidth)
         .attr("height", this.svgHeight);
-      //https://bl.ocks.org/piwodlaiwo/3734a1357696dcff203a94012646e932
-
+      // The following lines (Line 134-139) are adapted https://bl.ocks.org/piwodlaiwo/3734a1357696dcff203a94012646e932 to my needs
+      //From here
       svg
         .selectAll("path")
         .data(topojson.feature(worldMap, worldMap.objects.countries).features)
         .enter()
         .append("path")
         .attr("d", path)
+        //To here
         .style("stroke", "grey")
         .on("click", this.handleBarClick)
         .on("mouseover", this.showToolTip)

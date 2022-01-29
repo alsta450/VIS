@@ -68,7 +68,7 @@ export default {
         .style("font-size", "17px")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("ICU per million vs smoking rate");
+        .text("ICU per million vs smoking rate (in %)");
     },
 
     showToolTip(event, data) {
@@ -101,7 +101,7 @@ export default {
         .style("opacity", 1)
         .style("font-size", "17px")
         .style("font-weight", "bold")
-        .text("Total Smokers: " + data.smokers)
+        .text("Total Smokers: " + data.smokers + "%")
         .style("position", "absolute");
     },
     createBar() {
@@ -205,7 +205,7 @@ export default {
           this.svgHeight - this.svgPadding.top - this.svgPadding.bottom,
           0,
         ])
-        .domain([this.dataMin > 0 ? 0 : this.dataMin, this.dataMax]);
+        .domain([0,100]);
     },
   },
   watch: {
