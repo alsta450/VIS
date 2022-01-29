@@ -45,7 +45,7 @@ export default {
       this.drawYAxis();
 
       this.drawLines();
-
+      this.drawLines2();
     },
     //Tooltip
     showToolTip(event, data) {
@@ -59,7 +59,21 @@ export default {
         .style("opacity", 1)
         .style("font-size", "17px")
         .style("font-weight", "bold")
-        .text(data.location)
+        .text(data.State + " new Cases/Million")
+        .style("position", "absolute");
+    },
+        showToolTip2(event, data) {
+      //Delete old Tooltip before displaying new one
+      d3.select(".tooltip").remove();
+      d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("left", `${event.pageX - 30}px`)
+        .style("top", `${event.pageY - 30}px`)
+        .style("opacity", 1)
+        .style("font-size", "17px")
+        .style("font-weight", "bold")
+        .text(data.State + " new Vacc/Million")
         .style("position", "absolute");
     },
     //on mouse leave delete tooltip
@@ -89,8 +103,8 @@ export default {
         .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("Educational Attainment: Bachelor's Degree or Higher (%)")
-        .attr("x", 390)
+        .text("Timeline")
+        .attr("x", 250)
         .attr("y", 455)
         .style("font-size", 14);
     },
@@ -106,15 +120,15 @@ export default {
         .append("text")
         .attr("text-anchor", "end")
         .attr("fill", "black")
-        .text("Average Yearly Personal Income (in $)")
-        .attr("x", -100)
+        .text("New cases/million (smoothed) vs new Vacc/Million")
+        .attr("x", -60)
         .attr("y", -50)
         .attr("transform", "rotate(-90)")
         .style("font-size", 14);
     },
     //Draw points
     drawLines() {
-      console.log(this.getLineData); 
+      d3.selectAll(".line").remove();
       const lineGroup = d3.select(this.$refs.lineGroup);
       lineGroup
         .selectAll(".line-group")
@@ -124,13 +138,36 @@ export default {
         // .attr("class", "line-group")
         .append("path")
         .attr("class", "line")
-        .attr("d", d => {
-         return this.lineGenerator(d.values)});
+        .style("stroke", (d, i) => this.getColors(i))
+        .attr("d", (d) => {
+          return this.lineGenerator(d.values);
+        })
+        .on("mouseover", this.showToolTip)
+        .on("mouseout", this.deleteToolTip);
     },
+        drawLines2() {
 
-
+      const lineGroup = d3.select(this.$refs.lineGroup);
+      lineGroup
+        .selectAll(".line-group")
+        .data(this.getLineData)
+        .enter()
+        .append("g")
+        // .attr("class", "line-group")
+        .append("path")
+        .attr("class", "line")
+        .style("stroke", (d, i) => this.getColors(i))
+        .attr("d", (d) => {
+          return this.lineGenerator2(d.values);
+        })
+        .on("mouseover", this.showToolTip2)
+        .on("mouseout", this.deleteToolTip);
+    },
   },
   computed: {
+    getColors() {
+      return d3.scaleOrdinal(d3.schemeDark2);
+    },
 
     lineGenerator() {
       return d3
@@ -138,7 +175,12 @@ export default {
         .x((d) => this.xScale(d.year))
         .y((d) => this.yScale(d.cases));
     },
-
+    lineGenerator2() {
+      return d3
+        .line()
+        .x((d) => this.xScale(d.year))
+        .y((d) => this.yScale(d.vacc));
+    },
     getLineData: {
       get() {
         return this.$store.getters.getLineData;
@@ -198,6 +240,6 @@ export default {
 .line {
   fill: none;
   stroke: #000;
-  stroke-width: '0.5px'
+  stroke-width: "0.5px";
 }
 </style>

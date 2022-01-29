@@ -8,8 +8,6 @@ const store = new Vuex.Store({
   state: {
     selectedYear: 2006,
     selectedStates: [],
-    educationRates: [],
-    personalIncome: [],
     stateColor: new Map(),
     covid_data: [],
     barData: [],
@@ -28,7 +26,8 @@ const store = new Vuex.Store({
     },
     resetSelectedStates(state) {
       state.selectedStates = [];
-
+      state.lineData = [];
+      state.barData = [];
     },
     removeState(state, val) {
       state.selectedStates = state.selectedStates.filter(value => value !== val)
@@ -50,13 +49,19 @@ const store = new Vuex.Store({
 
     },
 
+    
+
     addLineData(state,val){
       var tempMax = 0;
       var tempDate = NaN;
       var parseDate = d3.timeParse("%Y-%m-%d");
       var temp = {State: val, values:[],max:0, maxDate:parseDate("2000-01-01"), minDate:parseDate("2030-01-01")};
+      var tempForSmooth = 0;
       for (var i = 0; i < state.covid_data.length; ++i) {
         if (val == state.covid_data[i].location) {
+
+
+          var tempVacc = +state.covid_data[i].new_vaccinations_smoothed_per_million;
           tempDate = parseDate(state.covid_data[i].date);
           if(tempDate > temp["maxDate"]){
             temp["maxDate"] = tempDate;
@@ -64,15 +69,25 @@ const store = new Vuex.Store({
           if(tempDate < temp["minDate"]){
             temp["minDate"] = tempDate;
           }
-          tempMax = +state.covid_data[i].new_cases_per_million.replace(".","");
+          tempMax = +state.covid_data[i].new_cases_smoothed_per_million.replace(".","");
           if(tempMax > temp["max"]){
             temp["max"] = tempMax;
           }
-          var tempCase =  +state.covid_data[i].new_cases_per_million.replace(".","");
+          var tempCase =  +state.covid_data[i].new_cases_smoothed_per_million.replace(".","");
+
+
           if(tempCase < 0){
             tempCase=0;
           }
-          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases:tempCase})
+
+          if(tempCase < tempForSmooth*0.4){
+            tempCase = tempForSmooth;
+          }
+          if(tempVacc<0){
+            tempVacc = 0;
+          }
+          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases:tempCase,vacc:tempVacc})
+          tempForSmooth = tempCase;
         }
       }
       state.lineData.push(temp);

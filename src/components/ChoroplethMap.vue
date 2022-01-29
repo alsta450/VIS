@@ -3,6 +3,9 @@
     <div class="dropwdown" ref="dropwdown">
       <select id="Button" ref="button"></select>
     </div>
+    <div id="reset">
+      <button v-on:click="resetStates">Reset States</button>
+    </div>
     <div class="placeholder"></div>
     <svg class="main-svg" ref="mainsvg" :width="svgWidth" :height="svgHeight">
       <g class="chart-group" ref="chartGroup">
@@ -36,18 +39,30 @@ export default {
     };
   },
   mounted() {
-    //this.deleteArea();
     this.projectStates();
     this.showDropdown();
     this.handleDropdown();
   },
   methods: {
+
+
+    resetStates() {
+        this.$store.commit("resetSelectedStates");
+    },
+
     showDropdown() {
+      console.log(
+        topojson.feature(worldMap, worldMap.objects.countries).features
+      );
       //https://www.d3-graph-gallery.com/graph/line_select.html
       var save = "1";
       d3.select(this.$refs.button)
         .selectAll("countries")
-        .data(topojson.feature(worldMap, worldMap.objects.countries).features)
+        .data(
+          this.sortStateName(
+            topojson.feature(worldMap, worldMap.objects.countries).features
+          )
+        )
         .enter()
         .append("option")
         .text((d) => d.properties.name)
@@ -99,11 +114,13 @@ export default {
     projectStates() {
       //The following lines (Line 55-59) are adapted from the link shown in the lessons: https://bl.ocks.org/cmgiven/abca90f6ba5f0a14c54d1eb952f8949c
       //Line 55-59
+
       var projection = d3
         .geoMercator()
         .scale([this.svgWidth - 430])
         .translate([this.svgWidth / 2, this.svgHeight / 1.5]);
       var path = d3.geoPath().projection(projection);
+
       var svg = d3
         .select(this.$refs.mainsvg)
         .append("svg")
@@ -123,13 +140,25 @@ export default {
         .on("click", this.handleBarClick)
         .on("mouseover", this.showToolTip)
         .on("mouseout", this.deleteToolTip)
-        .style("fill", (d) => {
-          if (this.getSelectedState.includes(d.properties.name)) return "red";
+        .style("fill", (d, i) => {
+          if (this.getSelectedState.includes(d.properties.name))
+            return this.getColors(i);
           return "white";
+        });
+    },
+
+    sortStateName() {
+      return topojson
+        .feature(worldMap, worldMap.objects.countries)
+        .features.sort(function (x, y) {
+          return d3.ascending(x.properties.name, y.properties.name);
         });
     },
   },
   computed: {
+    getColors() {
+      return d3.scaleOrdinal(d3.schemeDark2);
+    },
     getSelectedState: {
       get() {
         return this.$store.getters.selectedStates;
