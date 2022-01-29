@@ -57,8 +57,12 @@ const store = new Vuex.Store({
       var parseDate = d3.timeParse("%Y-%m-%d");
       var temp = {State: val, values:[],max:0, maxDate:parseDate("2000-01-01"), minDate:parseDate("2030-01-01")};
       var tempForSmooth = 0;
+      var tempForVaccRate = 0;
       for (var i = 0; i < state.covid_data.length; ++i) {
         if (val == state.covid_data[i].location) {
+
+            temp["GDP"]=+state.covid_data[i].gdp_per_capita.replace(".","");
+
 
 
           var tempVacc = +state.covid_data[i].new_vaccinations_smoothed_per_million;
@@ -86,8 +90,14 @@ const store = new Vuex.Store({
           if(tempVacc<0){
             tempVacc = 0;
           }
-          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases:tempCase,vacc:tempVacc})
+
+          var tempVaccRate = +state.covid_data[i].people_fully_vaccinated_per_hundred;
+          if(tempVaccRate < tempForVaccRate){
+            tempVaccRate = tempForVaccRate
+          }
+          temp["values"].push({year:parseDate(state.covid_data[i].date) ,cases:tempCase,vacc:tempVacc, vacc_percentage:tempVaccRate})
           tempForSmooth = tempCase;
+          tempForVaccRate = tempVaccRate;
         }
       }
       state.lineData.push(temp);
